@@ -8,6 +8,9 @@ from tempfile import gettempdir
 import unittest
 import os
 
+
+rutgers_glider_path = 'test-data/ru07-20130824T170228_rt0.nc'
+
 class TestCF(unittest.TestCase):
     # @see
     # http://www.saltycrane.com/blog/2012/07/how-prevent-nose-unittest-using-docstring-when-verbosity-2/
@@ -31,11 +34,14 @@ class TestCF(unittest.TestCase):
         '''
         self.cf = CFCheck()
 
-        dataset    = Dataset('test-data/ru07-20130824T170228_rt0.nc', 'r')
-        dogma      = NetCDFDogma('excuse_me', self.cf.beliefs(), dataset)
-        self.dpair = DSPair(dataset, dogma)
+    #--------------------------------------------------------------------------------
+    # Helper Methods
+    #--------------------------------------------------------------------------------
 
     def new_nc_file(self):
+        '''
+        Make a new temporary netCDF file for the scope of the test
+        '''
         nc_file_path = os.path.join(gettempdir(), 'example.nc')
         if os.path.exists(nc_file_path):
             raise IOError('File Exists: %s' % nc_file_path)
@@ -44,11 +50,29 @@ class TestCF(unittest.TestCase):
         self.addCleanup(nc.close)
         return nc
 
+    def get_pair(self, nc_dataset):
+        '''
+        Return a pairwise object for the dataset
+        '''
+        if isinstance(nc_dataset, basestring):
+            nc_dataset = Dataset(nc_dataset, 'r')
+            self.addCleanup(nc_dataset.close)
+        dogma = NetCDFDogma('nc', self.cf.beliefs(), nc_dataset)
+        pair = DSPair(nc_dataset, dogma)
+        return pair
+    
+    #--------------------------------------------------------------------------------
+    # Compliance Tests
+    #--------------------------------------------------------------------------------
+
     def test_filename(self):
         '''
         Section 2.1 Filenames
+
+        NetCDF files should have the file name extension
         '''
-        result = self.cf.check_filename_extension(self.dpair)
+        dataset = self.get_pair(rutgers_glider_path)
+        result = self.cf.check_filename_extension(dataset)
         self.assertTrue(result.value)
 
 
@@ -56,22 +80,36 @@ class TestCF(unittest.TestCase):
         bad_dataset_path = os.path.join(gettempdir(), 'example.netcdf')
         if os.path.exists(bad_dataset_path):
             raise IOError('File Exists: %s' % bad_dataset_path)
+        self.addCleanup(lambda x : os.path.exists(x) and os.remove(x), bad_dataset_path)
 
+        # Make a non-compliant file
         nc = Dataset(bad_dataset_path, 'w')
-        self.addCleanup(os.remove, bad_dataset_path)
         self.addCleanup(nc.close)
-        self.dpair.dataset = nc
-        result = self.cf.check_filename_extension(self.dpair)
+        dpair = self.get_pair(nc)
+        result = self.cf.check_filename_extension(dpair)
+        # Verify that the non-compliant file returns a negative result
         self.assertFalse(result.value)
 
 
     def test_naming_conventions(self):
         '''
-        Section 2.2 Naming Conventions
+        Section 2.3 Naming Conventions
 
         Variable, dimension and attribute names should begin with a letter and be composed of letters, digits, and underscores.
         '''
-        pass
+        # Create a compliant dataset
+        nc = self.new_nc_file()
+
+        # Make a dim
+        nc.createDimension('time', 2)
+        nc.createVariable('time', 'f', ('time',))
+
+        # Make a compliant variable
+        nc.createVariable('pressure', 'f', ('time',))
+
+        dataset = self.get_pair(nc)
+        result = self.cf.check_naming_conventions(dataset)
+        print result
 
 
         
