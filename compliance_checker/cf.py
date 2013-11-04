@@ -140,7 +140,7 @@ class CFCheck(BaseCheck):
     """
 
     def __init__(self):
-        self._coord_vars      = defaultdict(list)
+        self._coord_vars    = defaultdict(list)
         self._clim_vars     = defaultdict(list)
         self._boundary_vars = defaultdict(dict)
 
