@@ -9,7 +9,11 @@ import unittest
 import os
 
 
-rutgers_glider_path = 'test-data/ru07-20130824T170228_rt0.nc'
+static_files = {
+        'rutgers' : 'test-data/ru07-20130824T170228_rt0.nc',
+        'badname' : 'test-data/non-comp/badname.netcdf',
+        }
+
 
 class TestCF(unittest.TestCase):
     # @see
@@ -71,25 +75,15 @@ class TestCF(unittest.TestCase):
 
         NetCDF files should have the file name extension
         '''
-        dataset = self.get_pair(rutgers_glider_path)
+        dataset = self.get_pair(static_files['rutgers'])
         result = self.cf.check_filename_extension(dataset)
         self.assertTrue(result.value)
 
 
-        # Find a place to make a non-compliant file
-        bad_dataset_path = os.path.join(gettempdir(), 'example.netcdf')
-        if os.path.exists(bad_dataset_path):
-            raise IOError('File Exists: %s' % bad_dataset_path)
-        self.addCleanup(lambda x : os.path.exists(x) and os.remove(x), bad_dataset_path)
-
-        # Make a non-compliant file
-        nc = Dataset(bad_dataset_path, 'w')
-        self.addCleanup(nc.close)
-        dpair = self.get_pair(nc)
+        dpair = self.get_pair(static_files['badname'])
         result = self.cf.check_filename_extension(dpair)
         # Verify that the non-compliant file returns a negative result
         self.assertFalse(result.value)
-
 
     def test_naming_conventions(self):
         '''
@@ -97,19 +91,10 @@ class TestCF(unittest.TestCase):
 
         Variable, dimension and attribute names should begin with a letter and be composed of letters, digits, and underscores.
         '''
-        # Create a compliant dataset
-        nc = self.new_nc_file()
-
-        # Make a dim
-        nc.createDimension('time', 2)
-        nc.createVariable('time', 'f', ('time',))
-
-        # Make a compliant variable
-        nc.createVariable('pressure', 'f', ('time',))
-
-        dataset = self.get_pair(nc)
+        dataset = self.get_pair(static_files['rutgers'])
         result = self.cf.check_naming_conventions(dataset)
-        print result
+        #print result
+        
 
 
         
