@@ -262,7 +262,7 @@ class CFCheck(BaseCheck):
         """
         2.1 Filename - NetCDF files should have the file name extension ".nc".
         """
-        return Result(BaseCheck.LOW, ds.dataset.filepath().endswith(".nc"))
+        return Result(BaseCheck.LOW, ds.dataset.filepath().endswith(".nc"), '2.1 Filename')
 
     def check_data_types(self, ds):
         """
@@ -295,7 +295,7 @@ class CFCheck(BaseCheck):
             if not rname.match(k):
                 fails.append(k)
 
-        return Result(BaseCheck.HIGH, (total - len(fails), total), msgs=fails)
+        return Result(BaseCheck.HIGH, (total - len(fails), total), '2.3 Variable names', fails)
 
     def check_names_unique(self, ds):
         """

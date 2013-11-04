@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from compliance_checker.cf import CFCheck
+from compliance_checker.cf import CFCheck, BaseCheck
 from compliance_checker.suite import DSPair, NetCDFDogma
 from netCDF4 import Dataset
 from tempfile import gettempdir
@@ -12,6 +12,7 @@ import os
 static_files = {
         'rutgers' : 'test-data/ru07-20130824T170228_rt0.nc',
         'badname' : 'test-data/non-comp/badname.netcdf',
+        'bad'     : 'test-data/non-comp/bad.nc',
         }
 
 
@@ -93,8 +94,17 @@ class TestCF(unittest.TestCase):
         '''
         dataset = self.get_pair(static_files['rutgers'])
         result = self.cf.check_naming_conventions(dataset)
-        #print result
+        num_var = len(dataset.dataset.variables)
         
+        expected = (num_var,) * 2
+        self.assertEquals(result.value, expected)
+
+        dataset = self.get_pair(static_files['bad'])
+        result = self.cf.check_naming_conventions(dataset)
+        num_var = len(dataset.dataset.variables)
+        expected = (num_var-1, num_var)
+        self.assertEquals(result.value, expected)
+        self.assertEquals(result.msgs, ['_poor_dim'])
 
 
         
