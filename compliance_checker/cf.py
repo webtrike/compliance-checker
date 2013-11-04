@@ -368,6 +368,8 @@ class CFCheck(BaseCheck):
         acceptable to use a scalar coordinate variable which eliminates the need for an associated size one dimension in the data
         variable.
         """
+        #TODO: We need to identify a non-compliant example of this that can be verified, but I believe
+        #      that if the file is netCDF then this requirement may be met.
         pass
 
     def check_fill_value_outside_valid_range(self, ds):
@@ -835,7 +837,26 @@ class CFCheck(BaseCheck):
         """
         4 We strongly recommend that coordinate variables be used for all coordinate types whenever they are applicable.
         """
-        pass
+        ret_val = []
+        # 1. Verify that for any known or common coordinate name as a dmension
+        #    there is a coordinate variable for that dimension.
+        known_coordinate_names = ('longitude', 'lon'   , 'x',
+                                  'latitude' , 'lat'   , 'y',
+                                  'vertical' , 'height', 'z',
+                                  'time'               , 't')
+        for k,v in ds.dataset.dimensions.iteritems():
+            if k.lower() in known_coordinate_names:
+                valid = k in ds.dataset.variables
+                result = Result(BaseCheck.MEDIUM, valid, ('coordinate_type', k, 'var_for_coordinate_type'))
+                if not valid:
+                    result.msgs = ['No coordinate variable for coordinate type %s' % k]
+
+                ret_val.append(result)
+
+        #@TODO: Additional verifiable requirements
+
+        return ret_val
+
 
     def check_latitude(self, ds):
         """
@@ -845,7 +866,38 @@ class CFCheck(BaseCheck):
         Optionally, the latitude type may be indicated additionally by providing the standard_name attribute with the
         value latitude, and/or the axis attribute with the value Y.
         """
-        pass
+        ret_val = []
+        for k,v in ds.dataset.variables.iteritems():
+            if k.lower() != 'latitude':
+                continue
+
+            has_units = hasattr(k, 'units')
+            result = Result(BaseCheck.HIGH, has_units, ('latitude', k, 'has_units'))
+            ret_val.append(result)
+
+
+            # 0 - does not have units
+            # 1 - incorrect units
+            # 2 - also acceptable units
+            # 3 - recommend units
+            if not has_units:
+                result = Result(BaseCheck.MEDIUM, (0, 3), ('latitude', k, 'correct_units'))
+                ret_val.append(result)
+            elif has_units and v.units == 'degrees_north':
+                result = Result(BaseCheck.MEDIUM, (3, 3), ('latitude', k, 'correct_units'))
+                ret_val.append(result)
+            elif has_units and v.units in ('degree_north', 'degree_N', 'degrees_N', 'degreeN', 'degreesN'):
+                result = Result(BaseCheck.MEDIUM, (2, 3), ('latitude', k, 'correct_units'))
+                ret_val.append(result)
+            else:
+                result = Result(BaseCheck.MEDIUM, (1, 3), ('latitude', k, 'correct_units'))
+                ret_val.append(result)
+
+            break
+
+        return ret_val
+
+
 
     def check_longitude(self, ds):
         """

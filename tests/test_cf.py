@@ -108,4 +108,13 @@ class TestCF(unittest.TestCase):
 
 
         
+    def test_coordinate_types(self):
+        '''
+        Section 4 Coordinate Types
+
+        We strongly recommend that coordinate variables be used for all coordinate types whenever they are applicable.
+        '''
+
+        pass
+
 
