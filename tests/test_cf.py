@@ -10,9 +10,10 @@ import os
 
 
 static_files = {
-        'rutgers' : 'test-data/ru07-20130824T170228_rt0.nc',
-        'badname' : 'test-data/non-comp/badname.netcdf',
-        'bad'     : 'test-data/non-comp/bad.nc',
+        'rutgers'      : 'test-data/ru07-20130824T170228_rt0.nc',
+        'example-grid' : 'test-data/example-grid.nc',
+        'badname'      : 'test-data/non-comp/badname.netcdf',
+        'bad'          : 'test-data/non-comp/bad.nc',
         }
 
 
@@ -117,4 +118,28 @@ class TestCF(unittest.TestCase):
 
         pass
 
+    def test_latitude(self):
+        '''
+        Section 4.1 Latitude Coordinate
+        '''
+        dataset = self.get_pair(static_files['example-grid'])
+        results = self.cf.check_latitude(dataset)
+        for r in results:
+            if isinstance(r.value, tuple):
+                self.assertEquals(r.value[0], r.value[1])
+            else:
+                self.assertTrue(r.value)
+        
+
+    def test_longitude(self):
+        '''
+        Section 4.2 Longitude Coordinate
+        '''
+        dataset = self.get_pair(static_files['example-grid'])
+        results = self.cf.check_longitude(dataset)
+        for r in results:
+            if isinstance(r.value, tuple):
+                self.assertEquals(r.value[0], r.value[1])
+            else:
+                self.assertTrue(r.value)
 

@@ -262,7 +262,7 @@ class CFCheck(BaseCheck):
         """
         2.1 Filename - NetCDF files should have the file name extension ".nc".
         """
-        return Result(BaseCheck.LOW, ds.dataset.filepath().endswith(".nc"), '2.1 Filename')
+        return Result(BaseCheck.LOW, ds.dataset.filepath().endswith(".nc"), 'filename')
 
     def check_data_types(self, ds):
         """
@@ -858,6 +858,31 @@ class CFCheck(BaseCheck):
         return ret_val
 
 
+    def _coord_has_units(self, name,coordinate, var, recommended, acceptable):
+        ret_val = []
+        has_units = hasattr(var, 'units')
+        result = Result(BaseCheck.HIGH, has_units, ('latitude', name, 'has_units'))
+        ret_val.append(result)
+
+
+        # 0 - does not have units
+        # 1 - incorrect units
+        # 2 - also acceptable units
+        # 3 - recommend units
+        if not has_units:
+            result = Result(BaseCheck.MEDIUM, (0, 3), (coordinate, name, 'correct_units'))
+            ret_val.append(result)
+        elif has_units and var.units == recommended:
+            result = Result(BaseCheck.MEDIUM, (3, 3), (coordinate, name, 'correct_units'))
+            ret_val.append(result)
+        elif has_units and var.units in acceptable:
+            result = Result(BaseCheck.MEDIUM, (2, 3), (coordinate, name, 'correct_units'))
+            ret_val.append(result)
+        else:
+            result = Result(BaseCheck.MEDIUM, (1, 3), (coordinate, name, 'correct_units'))
+            ret_val.append(result)
+        return ret_val
+
     def check_latitude(self, ds):
         """
         4.1 Variables representing latitude must always explicitly include the units attribute; there is no default value.
@@ -867,37 +892,17 @@ class CFCheck(BaseCheck):
         value latitude, and/or the axis attribute with the value Y.
         """
         ret_val = []
+
+        recommended = 'degrees_north'
+        acceptable = ['degree_north', 'degree_N', 'degrees_N', 'degreeN', 'degreesN']
+    
         for k,v in ds.dataset.variables.iteritems():
-            if k.lower() != 'latitude':
-                continue
+            if k == 'latitude' or getattr(v, 'standard_name', None) == 'latitude':
+                results = self._coord_has_units(k, 'latitude', v, recommended, acceptable)
+                ret_val.extend(results)
 
-            has_units = hasattr(k, 'units')
-            result = Result(BaseCheck.HIGH, has_units, ('latitude', k, 'has_units'))
-            ret_val.append(result)
-
-
-            # 0 - does not have units
-            # 1 - incorrect units
-            # 2 - also acceptable units
-            # 3 - recommend units
-            if not has_units:
-                result = Result(BaseCheck.MEDIUM, (0, 3), ('latitude', k, 'correct_units'))
-                ret_val.append(result)
-            elif has_units and v.units == 'degrees_north':
-                result = Result(BaseCheck.MEDIUM, (3, 3), ('latitude', k, 'correct_units'))
-                ret_val.append(result)
-            elif has_units and v.units in ('degree_north', 'degree_N', 'degrees_N', 'degreeN', 'degreesN'):
-                result = Result(BaseCheck.MEDIUM, (2, 3), ('latitude', k, 'correct_units'))
-                ret_val.append(result)
-            else:
-                result = Result(BaseCheck.MEDIUM, (1, 3), ('latitude', k, 'correct_units'))
-                ret_val.append(result)
-
-            break
 
         return ret_val
-
-
 
     def check_longitude(self, ds):
         """
@@ -907,7 +912,18 @@ class CFCheck(BaseCheck):
         Optionally, the longitude type may be indicated additionally by providing the standard_name attribute with the
         value longitude, and/or the axis attribute with the value X.
         """
-        pass
+        ret_val = []
+
+        recommended = 'degrees_east'
+        acceptable = ['degree_east', 'degree_E', 'degrees_E', 'degreeE', 'degreesE']
+    
+        for k,v in ds.dataset.variables.iteritems():
+            if k == 'longitude' or getattr(v, 'standard_name', None) == 'longitude':
+                results = self._coord_has_units(k, 'longitude', v, recommended, acceptable)
+                ret_val.extend(results)
+
+
+        return ret_val
 
     def check_vertical_coordinate(self, ds):
         """
