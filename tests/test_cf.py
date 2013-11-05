@@ -156,6 +156,7 @@ class TestCF(unittest.TestCase):
         '''
         Section 4.2 Longitude Coordinate
         '''
+        # Check compliance
         dataset = self.get_pair(static_files['example-grid'])
         results = self.cf.check_longitude(dataset)
         for r in results:
@@ -163,4 +164,24 @@ class TestCF(unittest.TestCase):
                 self.assertEquals(r.value[0], r.value[1])
             else:
                 self.assertTrue(r.value)
+        
+        # Verify non-compliance
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_longitude(dataset)
+        # Store the results in a dict
+        rd = {}
+        for r in results:
+            rd[r.name[1:]] = r.value
+        # ('lon', 'has_units') should be False
+        self.assertFalse(rd[('lon', 'has_units')])
+        # ('lon', 'correct_units') should be (0,3)
+        self.assertEquals(rd[('lon', 'correct_units')], (0,3))
+        # ('lon_uv', 'has_units') should be True
+        self.assertTrue(rd[('lon_uv', 'has_units')])
+        # ('lon_uv', 'correct_units') should be (2,3)
+        self.assertEquals(rd[('lon_uv', 'correct_units')], (2,3))
+        # ('lon_like', 'has_units') should be True
+        self.assertTrue(rd[('lon_like', 'has_units')])
+        # ('lon_like', 'correct_units') should be (1,3)
+        self.assertEquals(rd[('lon_like', 'correct_units')], (1,3))
 
