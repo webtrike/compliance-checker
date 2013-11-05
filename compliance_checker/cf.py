@@ -941,6 +941,7 @@ class CFCheck(BaseCheck):
         # Is the axis set to Z?
         satisfied |= getattr(var, 'axis', '').lower() == 'z'
         is_pressure = units_convertible(getattr(var, 'units', '1'), 'dbar')
+        # Pressure defined or positive defined
         satisfied |= is_pressure
         if not is_pressure:
             satisfied |= getattr(var,'positive', '').lower() in ('up', 'down')
@@ -987,30 +988,76 @@ class CFCheck(BaseCheck):
 
     def check_dimensional_vertical_coordinate(self, ds):
         """
-        4.3.1 The units attribute for dimensional coordinates will be a string formatted as per the udunits.dat file.
-        The acceptable units for vertical (depth or height) coordinate variables are:
-        - units of pressure as listed in the file udunits.dat. For vertical axes the most commonly used of these
-          include include bar, millibar, decibar, atmosphere (atm), pascal (Pa), and hPa.
-        - units of length as listed in the file udunits.dat. For vertical axes the most commonly used of these include
-          meter (metre, m), and kilometer (km).
-        - other units listed in the file udunits.dat that may under certain circumstances reference vertical position
-          such as units of density or temperature.
+        4.3.1 The units attribute for dimensional coordinates will be a string
+        formatted as per the udunits.dat file.
+
+        The acceptable units for vertical (depth or height) coordinate variables
+        are:
+        - units of pressure as listed in the file udunits.dat. For vertical axes
+          the most commonly used of these include include bar, millibar,
+          decibar, atmosphere (atm), pascal (Pa), and hPa.
+        - units of length as listed in the file udunits.dat. For vertical axes
+          the most commonly used of these include meter (metre, m), and
+          kilometer (km).
+        - other units listed in the file udunits.dat that may under certain
+          circumstances reference vertical position such as units of density or
+          temperature.
 
         Plural forms are also acceptable.
         """
-        pass
+        ret_val = []
+        for k,v in ds.dataset.variables.iteritems():
+            # If this is not a vertical coordinate
+            if not self._is_vertical_coordinate(k,v):
+                continue
+
+            # If this is not height or depth
+            vertical_coordinates = ('height', 'depth')
+            if k not in vertical_coordinates and \
+                    getattr(v, 'standard_name', '') not in vertical_coordinates:
+                continue
+
+            # Satisfies 4.3.1
+            # Pressure or length is okay
+            is_pressure = units_convertible(getattr(v, 'units', '1'), 'dbar')
+            is_length   = units_convertible(getattr(v, 'units', '1'), 'm')
+            is_temp     = units_convertible(getattr(v, 'units', '1'), 'degrees_C')
+            is_density  = units_convertible(getattr(v, 'units', '1'), 'kg m-3')
+
+            if is_pressure or is_length:
+                result = Result(BaseCheck.HIGH, True,                     \
+                            ('dimensional_vertical', k, 'correct_units'), \
+                            ['dimensional vertical coordinate is pressure or length'])
+
+            # Temperature or Density are okay as well
+            elif is_temp or is_density:
+                result = Result(BaseCheck.HIGH, True,                     \
+                            ('dimensional_vertical', k, 'correct_units'), \
+                            ['dimensional vertical coordinate is temp or density'])
+            else:
+                result = Result(BaseCheck.HIGH, False,                    \
+                            ('dimensional_vertical', k, 'correct_units'), \
+                            ['incorrect vertical units'])
+            ret_val.append(result)
+
+        return ret_val
+                    
 
     def check_dimensionless_vertical_coordinate(self, ds):
         """
         4.3.2 The units attribute is not required for dimensionless coordinates.
 
-        The standard_name attribute associates a coordinate with its definition from Appendix D, Dimensionless
-        Vertical Coordinates. The definition provides a mapping between the dimensionless coordinate values and
-        dimensional values that can positively and uniquely indicate the location of the data.
+        The standard_name attribute associates a coordinate with its definition
+        from Appendix D, Dimensionless Vertical Coordinates. The definition
+        provides a mapping between the dimensionless coordinate values and
+        dimensional values that can positively and uniquely indicate the
+        location of the data.
 
-        A new attribute, formula_terms, is used to associate terms in the definitions with variables in a netCDF file.
-        To maintain backwards compatibility with COARDS the use of these attributes is not required, but is strongly recommended.
-        """
+        A new attribute, formula_terms, is used to associate terms in the
+        definitions with variables in a netCDF file.  To maintain backwards
+        compatibility with COARDS the use of these attributes is not required,
+        but is strongly recommended.  """
+
         pass
 
     def check_time_coordinate(self, ds):

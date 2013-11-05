@@ -217,6 +217,9 @@ class TestCF(unittest.TestCase):
         self.assertTrue(self.cf._is_vertical_coordinate('not_known', positive))
 
     def test_vertical_coordinate(self):
+        '''
+        Section 4.3 Vertical (Height or Depth) coordinate
+        '''
         # Check compliance
 
         dataset = self.get_pair(static_files['example-grid'])
@@ -243,4 +246,20 @@ class TestCF(unittest.TestCase):
         # ('depth2', 'correct_units') should be False
         self.assertFalse(rd[('depth2', 'correct_units')])
         
+
+    def test_vertical_dimension(self):
+        '''
+        Section 4.3.1 Dimensional Vertical Coordinate
+        '''
+        # Check for compliance
+        dataset = self.get_pair(static_files['example-grid'])
+        results = self.cf.check_dimensional_vertical_coordinate(dataset)
+        for r in results:
+            self.assertTrue(r.value)
+
+        # Check for non-compliance
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_dimensional_vertical_coordinate(dataset)
+        for r in results:
+            self.assertFalse(r.value)
 
