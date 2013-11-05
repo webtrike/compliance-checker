@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-from compliance_checker.cf import CFCheck, BaseCheck
+from compliance_checker.cf import CFCheck, BaseCheck, dimless_vertical_coordinates
 from compliance_checker.suite import DSPair, NetCDFDogma
 from netCDF4 import Dataset
 from tempfile import gettempdir
 
 import unittest
 import os
+import re
 
 
 static_files = {
@@ -262,4 +263,39 @@ class TestCF(unittest.TestCase):
         results = self.cf.check_dimensional_vertical_coordinate(dataset)
         for r in results:
             self.assertFalse(r.value)
+
+    def test_appendix_d(self):
+        '''
+        CF 1.6
+        Appendix D
+        The definitions given here allow an application to compute dimensional
+        coordinate values from the dimensionless ones and associated variables.
+        The formulas are expressed for a gridpoint (n,k,j,i) where i and j are
+        the horizontal indices, k is the vertical index and n is the time index.
+        A coordinate variable is associated with its definition by the value of
+        the standard_name attribute. The terms in the definition are associated
+        with file variables by the formula_terms attribute. The formula_terms
+        attribute takes a string value, the string being comprised of
+        blank-separated elements of the form "term: variable", where term is a
+        keyword that represents one of the terms in the definition, and variable
+        is the name of the variable in a netCDF file that contains the values
+        for that term. The order of elements is not significant.
+        '''
+
+        dimless = dict(dimless_vertical_coordinates)
+        def verify(std_name, test_str):
+            regex_matches = re.match(dimless[std_name], test_str)
+            self.assertIsNotNone(regex_matches)
+
+        verify('atmosphere_ln_pressure_coordinate', "p0: var1 lev: var2")
+        verify('atmosphere_sigma_coordinate', "sigma: var1 ps: var2 ptop: var3")
+        verify('atmosphere_hybrid_sigma_pressure_coordinate', "a: var1 b: var2 ps: var3 p0: var4")
+        verify('atmosphere_hybrid_height_coordinate', "a: var1 b: var2 orog: var3")
+        verify('atmosphere_sleve_coordinate', "a: var1 b1: var2 b2: var3 ztop: var4 zsurf1: var5 zsurf2: var6")
+        verify('ocean_sigma_coordinate', "sigma: var1 eta: var2 depth: var3")
+        verify('ocean_s_coordinate', "s: var1 eta: var2 depth: var3 a: var4 b: var5 depth_c: var6")
+        verify('ocean_sigma_z_coordinate', "sigma: var1 eta: var2 depth: var3 depth_c: var4 nsigma: var5 zlev: var6")
+        verify('ocean_double_sigma_coordinate', "sigma: var1 depth: var2 z1: var3 z2: var4 a: var5 href: var6 k_c: var7")
+
+
 

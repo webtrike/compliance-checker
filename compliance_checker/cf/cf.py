@@ -952,35 +952,52 @@ class CFCheck(BaseCheck):
 
     def check_vertical_coordinate(self, ds):
         """
-        4.3 Variables representing dimensional height or depth axes must always explicitly include the units attribute;
-        there is no default value.
+        4.3 Variables representing dimensional height or depth axes must always
+        explicitly include the units attribute; there is no default value.
 
-        The attribute positive is required if the vertical axis units are not a valid unit of pressure. The positive
-        attribute may have the value up or down (case insensitive). This attribute may be applied to either coordinate
-        variables or auxillary coordinate variables that contain vertical coordinate data.
+        The attribute positive is required if the vertical axis units are not a
+        valid unit of pressure. The positive attribute may have the value up or
+        down (case insensitive). This attribute may be applied to either
+        coordinate variables or auxillary coordinate variables that contain
+        vertical coordinate data.
+        
         """
-        ret_val = []
-        for k,v in ds.dataset.variables.iteritems():
+        
+        ret_val = [] 
+        for k,v in ds.dataset.variables.iteritems(): 
             if self._is_vertical_coordinate(k,v):
                 # Vertical variables MUST have units
-                has_units = hasattr(v, 'units')
-                result = Result(BaseCheck.HIGH, has_units, ('vertical', k, 'has_units'))
+                has_units = hasattr(v, 'units') 
+                result = Result(BaseCheck.HIGH, \
+                                has_units,      \
+                                ('vertical', k, 'has_units'))
                 ret_val.append(result)
 
                 # If it's not pressure then it must have positive defined
                 if not has_units:
-                    result = Result(BaseCheck.HIGH, False, ('vertical', k, 'correct_units'))
+                    result = Result(BaseCheck.HIGH, \
+                                    False,          \
+                                    ('vertical', k, 'correct_units'))
                     ret_val.append(result)
                     continue
 
+                # Do we have pressure?
                 is_pressure = units_convertible('dbar', v.units)
                 if is_pressure: 
-                    result = Result(BaseCheck.HIGH, True, ('vertical', k, 'correct_units'))
+                    result = Result(BaseCheck.HIGH, \
+                                    True,           \
+                                    ('vertical', k, 'correct_units'))
+                # What about positive?
                 elif getattr(v,'positive', '').lower() in ('up', 'down'):
-                    result = Result(BaseCheck.HIGH, True, ('vertical', k, 'correct_units'))
+                    result = Result(BaseCheck.HIGH, \
+                                    True,           \
+                                    ('vertical', k, 'correct_units'))
+                # Not-compliant
                 else:
-                    result = Result(BaseCheck.HIGH, False, ('vertical', k, 'correct_units'), 
-                                        ['vertical variable needs to define positive attribute'])
+                    result = Result(BaseCheck.HIGH,                   \
+                                    False,                            \
+                                    ('vertical', k, 'correct_units'), \
+                                    ['vertical variable needs to define positive attribute'])
                 ret_val.append(result)
         return ret_val
 
@@ -1056,29 +1073,36 @@ class CFCheck(BaseCheck):
         A new attribute, formula_terms, is used to associate terms in the
         definitions with variables in a netCDF file.  To maintain backwards
         compatibility with COARDS the use of these attributes is not required,
-        but is strongly recommended.  """
+        but is strongly recommended.  
+        """
 
         pass
 
     def check_time_coordinate(self, ds):
         """
-        4.4 Variables representing time must always explicitly include the units attribute; there is no default value.
+        4.4 Variables representing time must always explicitly include the units
+        attribute; there is no default value.
 
-        The units attribute takes a string value formatted as per the recommendations in the Udunits package.
+        The units attribute takes a string value formatted as per the
+        recommendations in the Udunits package.
 
-        The acceptable units for time are listed in the udunits.dat file. The most commonly used of these strings
-        (and their abbreviations) includes day (d), hour (hr, h), minute (min) and second (sec, s). Plural forms are
-        also acceptable. The reference time string (appearing after the identifier since) may include date alone; date and
-        time; or date, time, and time zone. The reference time is required. A reference time in year 0 has a special meaning
-        (see Section 7.4, "Climatological Statistics").
+        The acceptable units for time are listed in the udunits.dat file. The
+        most commonly used of these strings (and their abbreviations) includes
+        day (d), hour (hr, h), minute (min) and second (sec, s). Plural forms
+        are also acceptable. The reference time string (appearing after the
+        identifier since) may include date alone; date and time; or date, time,
+        and time zone. The reference time is required. A reference time in year
+        0 has a special meaning (see Section 7.4, "Climatological Statistics").
 
-        Recommend that the unit year be used with caution. It is not a calendar year.
-        For similar reasons the unit month should also be used with caution.
+        Recommend that the unit year be used with caution. It is not a calendar
+        year.  For similar reasons the unit month should also be used with
+        caution.
 
         A time coordinate is identifiable from its units string alone.
-        Optionally, the time coordinate may be indicated additionally by providing the standard_name attribute with an
-        appropriate value, and/or the axis attribute with the value T.
-        """
+        Optionally, the time coordinate may be indicated additionally by
+        providing the standard_name attribute with an appropriate value, and/or
+        the axis attribute with the value T.  
+        """ 
         pass
 
     def check_calendar(self, ds):
