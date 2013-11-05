@@ -122,6 +122,7 @@ class TestCF(unittest.TestCase):
         '''
         Section 4.1 Latitude Coordinate
         '''
+        # Check compliance
         dataset = self.get_pair(static_files['example-grid'])
         results = self.cf.check_latitude(dataset)
         for r in results:
@@ -129,6 +130,26 @@ class TestCF(unittest.TestCase):
                 self.assertEquals(r.value[0], r.value[1])
             else:
                 self.assertTrue(r.value)
+        
+        # Verify non-compliance
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_latitude(dataset)
+        # Store the results in a dict
+        rd = {}
+        for r in results:
+            rd[r.name[1:]] = r.value
+        # ('lat', 'has_units') should be False
+        self.assertFalse(rd[('lat', 'has_units')])
+        # ('lat', 'correct_units') should be (0,3)
+        self.assertEquals(rd[('lat', 'correct_units')], (0,3))
+        # ('lat_uv', 'has_units') should be True
+        self.assertTrue(rd[('lat_uv', 'has_units')])
+        # ('lat_uv', 'correct_units') should be (2,3)
+        self.assertEquals(rd[('lat_uv', 'correct_units')], (2,3))
+        # ('lat_like', 'has_units') should be True
+        self.assertTrue(rd[('lat_like', 'has_units')])
+        # ('lat_like', 'correct_units') should be (1,3)
+        self.assertEquals(rd[('lat_like', 'correct_units')], (1,3))
         
 
     def test_longitude(self):
