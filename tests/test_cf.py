@@ -185,3 +185,35 @@ class TestCF(unittest.TestCase):
         # ('lon_like', 'correct_units') should be (1,3)
         self.assertEquals(rd[('lon_like', 'correct_units')], (1,3))
 
+    def test_is_vertical_coordinate(self):
+        '''
+        Section 4.3 Qualifiers for Vertical Coordinate
+
+        NOTE: The standard doesn't explicitly say that vertical coordinates must be a 
+        coordinate type.
+        '''
+        # Make something that I can attach attrs to
+        mock_variable = type('MockVariable', (object,), {})
+
+        # Proper name/standard_name
+        known_name = mock_variable()
+        known_name.standard_name = 'depth'
+        self.assertTrue(self.cf._is_vertical_coordinate('not_known', known_name))
+
+        # Proper Axis
+        axis_set = mock_variable()
+        axis_set.axis = 'Z'
+        self.assertTrue(self.cf._is_vertical_coordinate('not_known', axis_set))
+
+        # Proper units
+        units_set = mock_variable()
+        units_set.units = 'dbar'
+        self.assertTrue(self.cf._is_vertical_coordinate('not_known', units_set))
+
+        # Proper units/positive
+        positive = mock_variable()
+        positive.units = 'm'
+        positive.positive = 'up'
+        self.assertTrue(self.cf._is_vertical_coordinate('not_known', positive))
+
+
