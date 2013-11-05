@@ -28,6 +28,7 @@ _possiblez = ["depth", "DEPTH",
            "siglay", "SIGLAY",
            "siglev", "SIGLEV",
            "sigma", "SIGMA",
+           "vertical", "VERTICAL",
           ]
 _possiblex = ["x", "X",
            "lon", "LON",
@@ -974,11 +975,11 @@ class CFCheck(BaseCheck):
                 is_pressure = units_convertible('dbar', v.units)
                 if is_pressure: 
                     result = Result(BaseCheck.HIGH, True, ('vertical', k, 'correct_units'))
-                elif getattr(v, 'units', '') in ('up', 'down'):
+                elif getattr(v,'positive', '').lower() in ('up', 'down'):
                     result = Result(BaseCheck.HIGH, True, ('vertical', k, 'correct_units'))
                 else:
                     result = Result(BaseCheck.HIGH, False, ('vertical', k, 'correct_units'), 
-                                        'vertical variable needs to define positive attribute')
+                                        ['vertical variable needs to define positive attribute'])
                 ret_val.append(result)
         return ret_val
 

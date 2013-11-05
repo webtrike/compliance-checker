@@ -216,4 +216,31 @@ class TestCF(unittest.TestCase):
         positive.positive = 'up'
         self.assertTrue(self.cf._is_vertical_coordinate('not_known', positive))
 
+    def test_vertical_coordinate(self):
+        # Check compliance
+
+        dataset = self.get_pair(static_files['example-grid'])
+        results = self.cf.check_vertical_coordinate(dataset)
+        for r in results:
+            self.assertTrue(r.value)
+
+        # Check non-compliance
+        dataset = self.get_pair(static_files['bad'])
+        results = self.cf.check_vertical_coordinate(dataset)
+        
+        # Store the results by the tuple
+        rd = { r.name[1:] : r.value for r in results }
+        # ('height', 'has_units') should be False
+        self.assertFalse(rd[('height', 'has_units')])
+        # ('height', 'correct_units') should be False
+        self.assertFalse(rd[('height', 'correct_units')])
+        # ('depth', 'has_units') should be True
+        self.assertTrue(rd[('depth', 'has_units')])
+        # ('depth', 'correct_units') should be False
+        self.assertFalse(rd[('depth', 'correct_units')])
+        # ('depth2', 'has_units') should be False
+        self.assertTrue(rd[('depth2', 'has_units')])
+        # ('depth2', 'correct_units') should be False
+        self.assertFalse(rd[('depth2', 'correct_units')])
+        
 
