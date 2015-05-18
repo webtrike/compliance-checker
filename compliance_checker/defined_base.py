@@ -32,6 +32,6 @@ class DefinedNCBaseCheck(DefinedBaseCheck,BaseNCCheck):
     @abstractmethod
     def limits(self):
         """
-        return the limits as dictonary of the dataset interrogated and defined by the Checker context
+        return the limits as dictionary of the data set interrogated and defined by the Checker context
         """
         raise NotImplementedError("Define this in your derived Checker class")

@@ -2,6 +2,7 @@ import numpy as np
 from compliance_checker.base import check_has, Result
 from compliance_checker.defined_base import DefinedNCBaseCheck
 from netCDF4 import Dataset
+from docutils.math.math2html import LimitsProcessor
 
 # more varlists - not used for checking
 def roms_varlist(option):
@@ -86,10 +87,23 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
         else:
             ni = xshape[0]
             nj = yshape[0]
+            
+        if "eta_rho" in ds.dimensions:
+            print "replacing shape derived nj with dimension eta_rho"
+            nj = len(ds.dimensions["eta_rho"])
 
+
+        if "xi_rho" in ds.dimensions:
+            print "replacing shape derived ni with dimension xi_rho"
+            ni = len(ds.dimensions["xi_rho"])
+            
         ninj = [ ni, nj ]
+        vals = dict()
+        vals['bounds'] = bounds
+        vals['nij'] = ninj
         
-        return {['bounds',bounds],['ni_nj',ninj]}
+        
+        return vals
     
     
     @check_has(DefinedNCBaseCheck.HIGH)
@@ -175,10 +189,16 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
             'eta_psi'
         ]
         
+        # they must exist in above
+        matching_dimension = [
+                              ('eta_rho','eta_u'),
+                              ('eta_psi','eta_v'),
+                              ('xi_psi','xi_u'),
+                              ('xi_rho','xi_v')]
         # TODO-UR check that the dimensions have the correct size relationship?
         
         level = DefinedNCBaseCheck.HIGH
-        out_of = len(required_variables) + len(required_dimensions)
+        out_of = len(required_variables) + len(required_dimensions) + len(matching_dimension)
         score = 0
         messages = []
         for variable in required_variables:
@@ -192,6 +212,14 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
             score += int(test)
             if not test:
                 messages.append("%s is a required dimension" % dim)
+        
+        for dimtuple in matching_dimension:
+            testdim1 =  ds.dimensions[dimtuple[0]]
+            testdim2 =  ds.dimensions[dimtuple[1]]
+            test = int(len(testdim1) == len(testdim2))
+            score += test
+            if not test:
+                messages.append("%s are required to be of same size!" % str(dimtuple))
         
         return self.make_result(level, score, out_of, 'Required Variables and Dimensions', messages,'check_2D')
         
@@ -273,6 +301,40 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
                 messages.append("%s is a required variable" % dim)
         
         return self.make_result(level, score, out_of, 'Required Variables and Dimensions', messages,'check_bathy')
+    
+    
+    def do_check_mask(self, ds):
+
+        '''
+        Verifies the dataset has the required variables for bathy
+        '''
+        # we could go overboard and test for units and dimesnions on the variables as well ....
+        # not really necessary here
+        required_variables = [
+            'mask_rho',
+            'mask_u',
+            'mask_v',
+            'mask_psi'
+        ]
+        
+        required_dimensions = []
+        level = DefinedNCBaseCheck.HIGH
+        out_of = len(required_variables) + len(required_dimensions)
+        score = 0
+        messages = []
+        for variable in required_variables:
+            test = variable in ds.variables
+            score += int(test)
+            if not test:
+                messages.append("%s is a required variable" % variable)
+                
+        for dim in required_dimensions:
+            test = dim in ds.dimensions
+            score += int(test)
+            if not test:
+                messages.append("%s is a required variable" % dim)
+        
+        return self.make_result(level, score, out_of, 'Required Variables and Dimensions', messages,'check_mask')
 
 
 
@@ -287,7 +349,10 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
         
                           
         if str("bathy").lower() in self.options:
-            scores.append(self.do_check_bathy(ds))             
+            scores.append(self.do_check_bathy(ds))
+            
+        if str("mask").lower() in self.options:
+            scores.append(self.do_check_mask(ds))             
         
         
         

@@ -11,8 +11,11 @@ def test_roms(file = "/usr/local/projects/trike/romsGrid.nc"):
     ds = Dataset(file)
     roms = DefinedROMSBaseCheck()
     roms.set_options("3D")
-    result = roms.check(DSPair(ds, None))
+    dsp = DSPair(ds, None)
+    result = roms.check(dsp)
+    limits = roms.limits(dsp)
     print result
+    print limits
     
     
 if __name__ == '__main__':

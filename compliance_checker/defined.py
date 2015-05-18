@@ -2,6 +2,7 @@ import traceback
 import sys
 from compliance_checker.suite import CheckSuite
 from compliance_checker.roms import DefinedROMSBaseCheck
+from __builtin__ import list
 
     
         
@@ -31,7 +32,7 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
         checkers     = self._get_valid_checkers(ds, checker_names)
 
         if len(checkers) == 0:
-            print "No valid checkers found for tests '%s'" % ",".join(checker_names)
+            print "No valid checkers found for tests '%s'" % ", ".join(checker_names)
 
         for checker_name, checker_class in checkers:
 
@@ -50,8 +51,10 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
                 errs['check'] = (e, sys.exc_info()[2])
             # score the results we got back
             groups = self.scores(vals)
-            
-            ret_val[checker_name] = groups, errs, checker.limits(dsp)
+            ret_val[checker_name] = []
+            ret_val[checker_name].append(groups)
+            ret_val[checker_name].append(errs)
+            ret_val[checker_name].append(checker.limits(dsp))
 
         return ret_val
     
