@@ -2,9 +2,8 @@ import traceback
 import sys
 from compliance_checker.suite import CheckSuite
 from compliance_checker.roms import DefinedROMSBaseCheck
-from __builtin__ import list
-
-    
+from compliance_checker.generic import DefinedGenericBaseCheck
+  
         
             
 
@@ -15,7 +14,8 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
     CheckSuite that defines all the possible Checker classes for the application, must be an extension of DefinedBaseCheck.
     """
     checkers = {
-        'roms'      : DefinedROMSBaseCheck 
+        'roms'      : DefinedROMSBaseCheck,
+        'generic'   : DefinedGenericBaseCheck
     }
     
     def set_optpions(self,t_options):
@@ -28,11 +28,16 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
         Returns a dictionary mapping checker names to a 2-tuple of their grouped scores and errors/exceptions while running checks.
         """
 
+        if None == checker_names or len(checker_names) == 0:
+            print "No valid checker type provided, falling back to generic"
+            checker_names = "generic"
+            
         ret_val      = {}
         checkers     = self._get_valid_checkers(ds, checker_names)
 
-        if len(checkers) == 0:
+        if len(checkers) == 0: # this is brute force to ensure some tests for limits
             print "No valid checkers found for tests '%s'" % ", ".join(checker_names)
+            checkers = ('generic',DefinedGenericBaseCheck),
 
         for checker_name, checker_class in checkers:
 
@@ -44,15 +49,21 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
             # instead of finding all 'check_' functions we leave it to the implementing class to call checks based on the options defined
             # it must be a class of DefinedBaseCheck
             
+            vals = None
             try:
                 checker.set_options(self.options)
                 vals = checker.check(dsp)
             except Exception as e:
                 errs['check'] = (e, sys.exc_info()[2])
-            # score the results we got back
-            groups = self.scores(vals)
+                print str(e)
+                
             ret_val[checker_name] = []
-            ret_val[checker_name].append(groups)
+            # score the results we got back
+            # if there was ana error vals is not going to be valid ....
+            if not vals == None:
+                groups = self.scores(vals)
+                ret_val[checker_name].append(groups)
+
             ret_val[checker_name].append(errs)
             ret_val[checker_name].append(checker.limits(dsp))
 

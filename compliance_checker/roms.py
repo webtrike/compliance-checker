@@ -2,7 +2,6 @@ import numpy as np
 from compliance_checker.base import check_has, Result
 from compliance_checker.defined_base import DefinedNCBaseCheck
 from netCDF4 import Dataset
-from docutils.math.math2html import LimitsProcessor
 
 # more varlists - not used for checking
 def roms_varlist(option):
