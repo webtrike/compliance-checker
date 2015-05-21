@@ -10,8 +10,10 @@ def test_suite(file = "/usr/local/projects/trike/romsGrid.nc"):
     ds = Dataset(file)
     cs.set_optpions('3D')
     vals = cs.run(ds, 'roms')
-    print vals
-
+    if len(vals) > 0:
+        print vals.values()[0]
+    else:
+        print "No results"
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
