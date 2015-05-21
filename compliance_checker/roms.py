@@ -3,6 +3,7 @@ from compliance_checker.base import check_has, Result
 from compliance_checker.defined_base import DefinedNCBaseCheck
 from netCDF4 import Dataset
 
+
 # more varlists - not used for checking
 def roms_varlist(option):
     """
@@ -79,10 +80,31 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
       
         xshape = ds.variables['lon_rho'].shape
         yshape = ds.variables['lat_rho'].shape
+        rotation = 0.
         
         if len(xshape) > 1:
             ni = xshape[len(xshape) -1]
             nj = xshape[len(xshape) -2]
+            # now calculate the overall rotation, its going to be off for curvliniar grids ...
+            # from the vertical -> nautical, off by 90
+            # dx = lons[nj-1,0] - lons[0,0] 
+            # dy = lats[nj-1,0] - lats[0,0]
+            
+            # from the horizontal -> cartesian
+            dx = lons[0,ni-1] - lons[0,0] 
+            dy = lats[0,ni-1] - lats[0,0]
+            
+            #if dx == 0:
+            #    if dx > 0:
+            #        rotation = 90.
+            #    else:
+            #        rotation = 270.
+            #else:    
+            #    theta = np.arctan(dy/dx)
+            #    rotation = theta * 180./np.pi
+                
+            rotation = DefinedNCBaseCheck.calc_rotation(self,dx,dy)
+            
         else:
             ni = xshape[0]
             nj = yshape[0]
@@ -95,11 +117,12 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
         if "xi_rho" in ds.dimensions:
             print "replacing shape derived ni with dimension xi_rho"
             ni = len(ds.dimensions["xi_rho"])
-            
+        
         ninj = [ ni, nj ]
         vals = dict()
         vals['bounds'] = bounds
         vals['nij'] = ninj
+        vals['rotation'] = rotation
         
         
         return vals

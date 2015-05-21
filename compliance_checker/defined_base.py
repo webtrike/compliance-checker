@@ -1,7 +1,7 @@
 from compliance_checker.base import BaseCheck,BaseNCCheck,DSPair
 import string
 from abc import abstractmethod
-
+import numpy as np
 
 class DefinedBaseCheck(BaseCheck):
     options = []
@@ -35,3 +35,18 @@ class DefinedNCBaseCheck(DefinedBaseCheck,BaseNCCheck):
         return the limits as dictionary of the data set interrogated and defined by the Checker context
         """
         raise NotImplementedError("Define this in your derived Checker class")
+    
+    
+    def calc_rotation(self, dx, dy ):
+        # now calculate the overall rotation, its going to be off for curvliniar grids ...
+        rotation = 0.
+        if dx == 0:
+            if dx > 0:
+                rotation = 90.
+            else:
+                rotation = 270.
+        else:    
+            theta = np.arctan(dy/dx)
+            rotation = theta * 180./np.pi
+            
+        return rotation

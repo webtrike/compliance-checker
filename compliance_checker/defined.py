@@ -38,7 +38,7 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
         if len(checkers) == 0: # this is brute force to ensure some tests for limits
             print "No valid checkers found for tests '%s'" % ", ".join(checker_names)
             checkers = ('generic',DefinedGenericBaseCheck),
-
+        #normally this would return only one!
         for checker_name, checker_class in checkers:
 
             checker            = checker_class()   # @TODO: combine with load_datapair/setup
@@ -63,10 +63,11 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
             if not vals == None:
                 groups = self.scores(vals)
                 ret_val[checker_name].append(groups)
-
+            
             ret_val[checker_name].append(errs)
             ret_val[checker_name].append(checker.limits(dsp))
-
+            ret_val[checker_name].append({("type",checker_name),("requested",checker_names)})
+                        
         return ret_val
     
 
