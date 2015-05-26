@@ -66,7 +66,8 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
             
             ret_val[checker_name].append(errs)
             ret_val[checker_name].append(checker.limits(dsp))
-            ret_val[checker_name].append({("type",checker_name),("requested",checker_names)})
+            ret_val[checker_name].append({"type":checker_name,
+                                          "requested":checker_names})
                         
         return ret_val
     

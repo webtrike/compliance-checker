@@ -85,7 +85,7 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
         if len(xshape) > 1:
             ni = xshape[len(xshape) -1]
             nj = xshape[len(xshape) -2]
-            # now calculate the overall rotation, its going to be off for curvliniar grids ...
+            # now calculate the overall rotation, its going to be off for curvlinear grids ...
             # from the vertical -> nautical, off by 90
             # dx = lons[nj-1,0] - lons[0,0] 
             # dy = lats[nj-1,0] - lats[0,0]
@@ -93,15 +93,6 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
             # from the horizontal -> cartesian
             dx = lons[0,ni-1] - lons[0,0] 
             dy = lats[0,ni-1] - lats[0,0]
-            
-            #if dx == 0:
-            #    if dx > 0:
-            #        rotation = 90.
-            #    else:
-            #        rotation = 270.
-            #else:    
-            #    theta = np.arctan(dy/dx)
-            #    rotation = theta * 180./np.pi
                 
             rotation = DefinedNCBaseCheck.calc_rotation(self,dx,dy)
             
