@@ -74,7 +74,7 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
             lons = ds.variables['lon_rho'][:]
             lats = ds.variables['lat_rho'][:]
         else:
-            raise RuntimeError('Cannot find lat_rho/lon_rho variables in %s' % ds.filepath)
+            raise RuntimeError('Cannot find lat_rho/lon_rho variables in %s' % str(ds.filepath))
     
         bounds = [float(np.amin(lons)), float(np.amax(lons)), float(np.amin(lats)), float(np.amax(lats))]
       

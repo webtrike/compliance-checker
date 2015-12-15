@@ -59,7 +59,7 @@ class DefinedGenericBaseCheck(DefinedNCBaseCheck):
                 scores += 1
                 break
         if xvar == None or yvar == None:
-            raise RuntimeError('Cannot find coordinate variables in %s' % ds.filepath)
+            raise RuntimeError('Cannot find coordinate variables in %s' % str(ds.filepath))
         
         
         
@@ -133,6 +133,11 @@ class DefinedGenericBaseCheck(DefinedNCBaseCheck):
         #if str("3D").lower() in self.options:
         #    scores.append(self.do_check_3D(ds))
                     
+        # now the question is if we should be tight about anything this component does not actually do ?
+        if self.options != '2D':
+            for o in self.options:
+                if o != '2D':
+                    scores.append(self.make_result(DefinedNCBaseCheck.LOW, 0, 1,'Requested test' ,('Option not supported',),o))
         
         
         

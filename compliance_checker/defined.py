@@ -64,8 +64,13 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
                 groups = self.scores(vals)
                 ret_val[checker_name].append(groups)
             
+            try:
+                ret_val[checker_name].append(checker.limits(dsp))
+            except Exception as e:
+                errs.append(str(e))
+                
             ret_val[checker_name].append(errs)
-            ret_val[checker_name].append(checker.limits(dsp))
+            
             ret_val[checker_name].append({"type":checker_name,
                                           "requested":checker_names})
                         
