@@ -352,7 +352,11 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
 
 
     def check(self,dsp):
-    
+        from wicken.netcdf_dogma import NetCDFDogma
+        
+        if not isinstance(dsp.dogma,NetCDFDogma):
+            raise RuntimeError("Expecting Netcdf dogma, found: "+str(dsp.dogma))
+        
         scores = []
         ds = dsp.dataset
         scores.append(self.do_check_2D(ds))

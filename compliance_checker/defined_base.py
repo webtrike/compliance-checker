@@ -50,3 +50,12 @@ class DefinedNCBaseCheck(DefinedBaseCheck,BaseNCCheck):
             rotation = theta * 180./np.pi
             
         return rotation
+    
+    
+    def load_datapair(self, ds):
+        """
+        Returns a DSPair object with the passed ds as one side and the proper Dogma object on the other.
+
+        Override this in your derived class.
+        """
+        return BaseNCCheck.load_datapair(self,ds)

@@ -130,6 +130,14 @@ class Result(object):
         if len(self.children):
             ret += " (%d children)" % len(self.children)
             ret += "\n" + pprint.pformat(self.children)
+        
+        if self.checker is not None:
+            ret += " Checker: "+str(self.checker)
+                
+        if self.check_method is not None:
+            ret += " Call: "+str(self.check_method)
+            
+            
         return ret
 
 def std_check_in(dataset_dogma, name, allowed_vals):

@@ -3,7 +3,7 @@ import sys
 from compliance_checker.suite import CheckSuite
 from compliance_checker.roms import DefinedROMSBaseCheck
 from compliance_checker.generic import DefinedGenericBaseCheck
-  
+from compliance_checker.shoc import DefinedSHOCBaseCheck  
         
             
 
@@ -15,6 +15,7 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
     """
     checkers = {
         'roms'      : DefinedROMSBaseCheck,
+        'shoc'      : DefinedSHOCBaseCheck,
         'generic'   : DefinedGenericBaseCheck
     }
     
