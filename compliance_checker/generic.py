@@ -90,8 +90,8 @@ class DefinedGenericBaseCheck(DefinedNCBaseCheck):
         else:
             ni = xshape[0]
             nj = yshape[0]
-            dx = lons[1] - lons[0] 
-            dy = lats[1] - lats[0]
+            width = lons[len(lons)-1] - lons[0]
+            height = lats[len(lats)-1] - lats[0] 
             rotation = 0.
             
             
