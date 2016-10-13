@@ -81,8 +81,13 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
         xshape = ds.variables['lon_rho'].shape
         yshape = ds.variables['lat_rho'].shape
         rotation = 0.
+        dx = 0.
+        dy = 0.
+        
+        
         
         if len(xshape) > 1:
+            import math
             ni = xshape[len(xshape) -1]
             nj = xshape[len(xshape) -2]
             # now calculate the overall rotation, its going to be off for curvlinear grids ...
@@ -91,14 +96,28 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
             # dy = lats[nj-1,0] - lats[0,0]
             
             # from the horizontal -> cartesian
+            '''
             dx = lons[0,ni-1] - lons[0,0] 
             dy = lats[0,ni-1] - lats[0,0]
                 
-            rotation = DefinedNCBaseCheck.calc_rotation(self,dx,dy)
+            rotation = DefinedNCBaseCheck.calc_rotation(self,dx,dy)           
+            '''
+            widthX = lons[0,ni-1] - lons[0,0] 
+            heightX = lats[0,ni-1] - lats[0,0]
+            rotation = DefinedNCBaseCheck.calc_rotation(self,widthX,heightX)
+            # now extract the actual width and height
+            widthY = lons[nj-1,0] - lons[0,0] 
+            heightY = lats[nj-1,0] - lats[0,0]
+            
+            height=math.sqrt((widthY*widthY)+(heightY*heightY))
+            width=math.sqrt((widthX*widthX)+(heightX*heightX))
             
         else:
             ni = xshape[0]
             nj = yshape[0]
+            dx = lons[1] - lons[0]
+            dy = lats[1] - lats[0]
+            
             
         if "eta_rho" in ds.dimensions:
             print "replacing shape derived nj with dimension eta_rho"
@@ -113,6 +132,8 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
         vals = dict()
         vals['bounds'] = bounds
         vals['nij'] = ninj
+        vals['height'] = height
+        vals['width'] = width
         vals['rotation'] = rotation
         
         

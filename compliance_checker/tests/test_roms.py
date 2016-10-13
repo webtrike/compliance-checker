@@ -6,12 +6,13 @@ from netCDF4 import Dataset
 
 # not updated
 @pytest.mark.xfail
-def test_roms(file = "/usr/local/projects/trike/romsGrid.nc"):
-
-    ds = Dataset(file)
+def test_roms(ffile = "/usr/local/projects/trike/romsGrid.nc"):
+    #from wicken.netcdf_dogma import NetCDFDogma
+    ds = Dataset(ffile)
     roms = DefinedROMSBaseCheck()
     roms.set_options("3D")
-    dsp = DSPair(ds, None)
+    #dsp = DSPair(ds, NetCDFDogma)
+    dsp = roms.load_datapair(ds)
     result = roms.check(dsp)
     limits = roms.limits(dsp)
     print result
@@ -20,6 +21,6 @@ def test_roms(file = "/usr/local/projects/trike/romsGrid.nc"):
     
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        test_roms(file = sys.argv[1])
+        test_roms(ffile = sys.argv[1])
     else:    
         test_roms()

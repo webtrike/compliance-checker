@@ -73,22 +73,35 @@ class DefinedGenericBaseCheck(DefinedNCBaseCheck):
         rotation = 0.
         
         if len(xshape) > 1:
+            import math
             ni = xshape[len(xshape) -1]
             nj = xshape[len(xshape) -2]
-            dx = lons[0,ni-1] - lons[0,0] 
-            dy = lats[0,ni-1] - lats[0,0]
-            rotation = DefinedNCBaseCheck.calc_rotation(self,dx,dy)
             
+            # from the horizontal -> cartesian
+            widthX = lons[0,ni-1] - lons[0,0] 
+            heightX = lats[0,ni-1] - lats[0,0]
+            rotation = DefinedNCBaseCheck.calc_rotation(self,widthX,heightX)
+            # now extract the actual width and height
+            widthY = lons[nj-1,0] - lons[0,0] 
+            heightY = lats[nj-1,0] - lats[0,0]
+            
+            height=math.sqrt((widthY*widthY)+(heightY*heightY))
+            width=math.sqrt((widthX*widthX)+(heightX*heightX))
         else:
             ni = xshape[0]
             nj = yshape[0]
+            dx = lons[1] - lons[0] 
+            dy = lats[1] - lats[0]
+            rotation = 0.
+            
             
         ninj = [ ni, nj ]
         vals = dict()
         vals['bounds'] = bounds
         vals['nij'] = ninj
         vals['rotation'] = rotation
-        
+        vals['height'] = height
+        vals['width'] = width
         return vals
         
         

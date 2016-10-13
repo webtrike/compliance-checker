@@ -62,13 +62,17 @@ class DefinedSHOCBaseCheck(DefinedNCBaseCheck):
             if 'latitude' in ds.variables and 'longitude' in ds.variables:
                 lons = ds.variables['longitude'][:]
                 lats = ds.variables['latitude'][:]
+                xshape = ds.variables['longitude'].shape
+                yshape = ds.variables['latitude'].shape
+            elif 'lat' in ds.variables and 'lon' in ds.variables:
+                lons = ds.variables['lon'][:]
+                lats = ds.variables['lat'][:]
+                xshape = ds.variables['lon'].shape
+                yshape = ds.variables['lat'].shape
             else:
                 raise RuntimeError('Cannot find latitude/longitude variables in %s' % ds.filepath)
         
             bounds = [float(np.amin(lons)), float(np.amax(lons)), float(np.amin(lats)), float(np.amax(lats))]
-          
-            xshape = ds.variables['longitude'].shape
-            yshape = ds.variables['latitude'].shape
             
             if 'time' in ds.variables and len(ds.variables['time']) > 0:
                 tv = ds.variables['time']
@@ -77,22 +81,35 @@ class DefinedSHOCBaseCheck(DefinedNCBaseCheck):
                 times.append(DTExportFormat.format(num2date(tv[len(tv)-1],tv.units)))
              
         if len(xshape) > 1:
+            import math
             ni = xshape[len(xshape) -1]
             nj = xshape[len(xshape) -2]
             
             # from the horizontal -> cartesian
-            dx = lons[0,ni-1] - lons[0,0] 
-            dy = lats[0,ni-1] - lats[0,0]
-            rotation = DefinedNCBaseCheck.calc_rotation(self,dx,dy)
+            widthX = lons[0,ni-1] - lons[0,0] 
+            heightX = lats[0,ni-1] - lats[0,0]
+            rotation = DefinedNCBaseCheck.calc_rotation(self,widthX,heightX)
+            # now extract the actual width and height
+            widthY = lons[nj-1,0] - lons[0,0] 
+            heightY = lats[nj-1,0] - lats[0,0]
+            
+            height=math.sqrt((widthY*widthY)+(heightY*heightY))
+            width=math.sqrt((widthX*widthX)+(heightX*heightX))
+
         else:
             ni = xshape[0]
             nj = yshape[0]
+            width = lons[len(lons)-1] - lons[0]
+            height = lats[len(lats)-1] - lats[0] 
+            rotation = 0.
 
         ninj = [ ni, nj ]
         vals = dict()
         vals['bounds'] = bounds
         vals['nij'] = ninj
         vals['time'] = times
+        vals['width'] = width
+        vals['height'] = height
         vals['rotation'] = rotation
         
         
