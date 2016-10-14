@@ -55,20 +55,25 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
                 checker.set_options(self.options)
                 vals = checker.check(dsp)
             except Exception as e:
-                errs['check'] = (e, sys.exc_info()[2])
+                errs['check'] = [e, sys.exc_info()[2]]
                 print str(e)
                 
             ret_val[checker_name] = []
+            #  we always need to return a list 4 elements
+            
             # score the results we got back
             # if there was ana error vals is not going to be valid ....
             if not vals == None:
                 groups = self.scores(vals)
                 ret_val[checker_name].append(groups)
-            
+            else:
+                ret_val[checker_name].append(list())
+                
             try:
                 ret_val[checker_name].append(checker.limits(dsp))
             except Exception as e:
-                errs.append(str(e))
+                errs['limits'] = [e, sys.exc_info()[2]]
+                ret_val[checker_name].append(dict())
                 
             ret_val[checker_name].append(errs)
             

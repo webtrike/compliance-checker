@@ -37,7 +37,7 @@ class DefinedGenericBaseCheck(DefinedNCBaseCheck):
 
     @classmethod
     def make_result(cls, level, score, out_of, name, messages, the_method):
-        return Result(level, (score, out_of), name, messages,None,"roms",the_method)
+        return Result(level, (score, out_of), name, messages,None,"generic",the_method)
 
     def setup(self, ds):
         pass
@@ -146,12 +146,12 @@ class DefinedGenericBaseCheck(DefinedNCBaseCheck):
         #if str("3D").lower() in self.options:
         #    scores.append(self.do_check_3D(ds))
                     
+        '''            
         # now the question is if we should be tight about anything this component does not actually do ?
-        if self.options != '2D':
-            for o in self.options:
-                if o != '2D':
-                    scores.append(self.make_result(DefinedNCBaseCheck.LOW, 0, 1,'Requested test' ,('Option not supported',),o))
-        
+        for o in self.options:
+            if o != '2D' and o != 'generic':
+                scores.append(self.make_result(DefinedNCBaseCheck.LOW, 0, 1,'Requested test' ,['Option not supported',o],o))
+        '''
         
         
         return scores
