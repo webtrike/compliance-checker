@@ -111,13 +111,13 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
             
             height=math.sqrt((widthY*widthY)+(heightY*heightY))
             width=math.sqrt((widthX*widthX)+(heightX*heightX))
-            
+            origin = (lons[0,0],lats[0,0])
         else:
             ni = xshape[0]
             nj = yshape[0]
             width = lons[len(lons)-1] - lons[0]
             height = lats[len(lats)-1] - lats[0] 
-            
+            origin = (lons[0],lats[0])
             
         if "eta_rho" in ds.dimensions:
             print "replacing shape derived nj with dimension eta_rho"
@@ -131,11 +131,11 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
         ninj = [ ni, nj ]
         vals = dict()
         vals['bounds'] = bounds
-        vals['nij'] = ninj
+        vals['ni_nj'] = ninj
         vals['height'] = height
         vals['width'] = width
         vals['rotation'] = rotation
-        
+        vals['origin'] = origin
         
         return vals
     
