@@ -71,6 +71,7 @@ class DefinedGenericBaseCheck(DefinedNCBaseCheck):
         xshape = ds.variables[xvar].shape
         yshape = ds.variables[yvar].shape
         rotation = 0.
+        corners = list()
         
         if len(xshape) > 1:
             import math
@@ -88,6 +89,10 @@ class DefinedGenericBaseCheck(DefinedNCBaseCheck):
             height=math.sqrt((widthY*widthY)+(heightY*heightY))
             width=math.sqrt((widthX*widthX)+(heightX*heightX))
             origin = [lons[0,0],lats[0,0]]
+            corners.append(origin)
+            corners.append((lons[nj-1,0],lats[nj-1,0]))
+            corners.append((lons[nj-1,ni-1],lats[nj-1,ni-1]))
+            corners.append((lons[0,ni-1],lats[0,ni-1]))
         else:
             ni = xshape[0]
             nj = yshape[0]
@@ -95,7 +100,10 @@ class DefinedGenericBaseCheck(DefinedNCBaseCheck):
             height = lats[len(lats)-1] - lats[0] 
             rotation = 0.
             origin = [lons[0],lats[0]]
-            
+            corners.append(origin)
+            corners.append((lons[0],lats[nj-1]))
+            corners.append((lons[ni-1],lats[nj-1]))
+            corners.append((lons[ni-1],lats[0]))
             
         ninj = [ ni, nj ]
         vals = dict()
@@ -105,6 +113,8 @@ class DefinedGenericBaseCheck(DefinedNCBaseCheck):
         vals['height'] = height
         vals['width'] = width
         vals['origin'] = origin
+        vals['corners'] = corners
+        
         return vals
         
         
