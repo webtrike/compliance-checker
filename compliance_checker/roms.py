@@ -81,8 +81,7 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
         xshape = ds.variables['lon_rho'].shape
         yshape = ds.variables['lat_rho'].shape
         rotation = 0.
-        dx = 0.
-        dy = 0.
+        corners = list()
         
         
         
@@ -112,12 +111,23 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
             height=math.sqrt((widthY*widthY)+(heightY*heightY))
             width=math.sqrt((widthX*widthX)+(heightX*heightX))
             origin = (lons[0,0],lats[0,0])
+            corners.append(origin)
+            corners.append((lons[nj-1,0],lats[nj-1,0]))
+            corners.append((lons[nj-1,ni-1],lats[nj-1,ni-1]))
+            corners.append((lons[0,ni-1],lats[0,ni-1]))
+            
         else:
             ni = xshape[0]
             nj = yshape[0]
             width = lons[len(lons)-1] - lons[0]
             height = lats[len(lats)-1] - lats[0] 
             origin = (lons[0],lats[0])
+            corners.append(origin)
+            corners.append((lons[0],lats[nj-1]))
+            corners.append((lons[ni-1],lats[nj-1]))
+            corners.append((lons[ni-1],lats[0]))
+            
+            
             
         if "eta_rho" in ds.dimensions:
             print "replacing shape derived nj with dimension eta_rho"
@@ -136,6 +146,7 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
         vals['width'] = width
         vals['rotation'] = rotation
         vals['origin'] = origin
+        vals['corners'] = corners
         
         return vals
     
