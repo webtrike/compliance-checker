@@ -3,7 +3,7 @@ import os.path
 import itertools
 from collections import defaultdict
 from lxml import etree
-from udunitspy import Unit, UdunitsError, Converter
+from cf_units import Unit
 from netCDF4 import Dimension, Variable
 from pkgutil import get_data
 
@@ -250,8 +250,8 @@ class StandardNameTable(object):
 
 def units_known(units):
     try:
-        Unit(str(units))
-    except UdunitsError:
+        Unit(units)
+    except ValueError:
         return False
     return True
 
@@ -259,22 +259,15 @@ def units_convertible(units1, units2, reftimeistime=True):
     """Return True if a Unit representing the string units1 can be converted
     to a Unit representing the string units2, else False."""
     try:
-        Converter(str(units1), str(units2))
-    except UdunitsError:
-        return False
-
-    u1 = Unit(str(units1))
-    u2 = Unit(str(units2))
-    return u1.are_convertible(u2)
+      u1 = Unit(units1)
+      u2 = Unit(units2)
+    except ValueError:
+      return False
+    return u1.is_convertible(units2)
 
 def units_temporal(units):
-    r = False
-    try:
-        u = Unit('seconds since 1900-01-01')
-        r = u.are_convertible(str(units))
-    except UdunitsError:
-        return False
-    return r
+    u = Unit(units)
+    return u.is_time_reference()
 
 def map_axes(dim_vars, reverse_map=False):
     """

@@ -30,14 +30,14 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
         """
 
         if None == checker_names or len(checker_names) == 0:
-            print "No valid checker type provided, falling back to generic"
+            print("No valid checker type provided, falling back to generic")
             checker_names = "generic"
             
         ret_val      = {}
         checkers     = self._get_valid_checkers(ds, checker_names)
 
         if len(checkers) == 0: # this is brute force to ensure some tests for limits
-            print "No valid checkers found for tests '%s'" % ", ".join(checker_names)
+            print("No valid checkers found for tests '%s'" % ", ".join(checker_names))
             checkers = ('generic',DefinedGenericBaseCheck),
         #normally this would return only one!
         for checker_name, checker_class in checkers:
@@ -56,7 +56,7 @@ class ComplianceCheckerCheckSuiteDefined(CheckSuite):
                 vals = checker.check(dsp)
             except Exception as e:
                 errs['check'] = [e, sys.exc_info()[2]]
-                print str(e)
+                print(str(e))
                 
             ret_val[checker_name] = []
             #  we always need to return a list 4 elements
@@ -117,13 +117,13 @@ class ComplianceCheckerDefined(object):
             groups, errors = rpair
 
             if len(errors):
-                print "The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker
+                print("The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker)
 
                 for check_name, epair in errors.iteritems():
-                    print "%s.%s: %s" % (checker, check_name, epair[0].message)
+                    print("%s.%s: %s" % (checker, check_name, epair[0].message))
                     if verbose > 0:
                         traceback.print_tb(epair[1].tb_next.tb_next)    # skip first two as they are noise from the running itself @TODO search for check_name
-                        print
+                        print(' ')
 
             score_list, points, out_of = cs.standard_output(limit, checker, groups)
             if not verbose:

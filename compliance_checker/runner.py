@@ -55,10 +55,10 @@ class ComplianceChecker(object):
             groups, errors = rpair
 
             if len(errors):
-                print "The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker
+                print("The following exceptions occured during the %s checker (possibly indicate compliance checker issues):" % checker)
 
                 for check_name, epair in errors.iteritems():
-                    print "%s.%s: %s" % (checker, check_name, epair[0].message)
+                    print("%s.%s: %s" % (checker, check_name, epair[0].message))
                     if verbose > 0:
                         traceback.print_tb(epair[1].tb_next.tb_next)    # skip first two as they are noise from the running itself @TODO search for check_name
                         print

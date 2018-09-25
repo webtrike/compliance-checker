@@ -38,7 +38,7 @@ def roms_varlist(option):
         varlist = (['h','s_rho','s_w','Cs_r','Cs_w', \
           'theta_s','theta_b','Tcline','hc'])
     else:
-        raise Warning, 'Unknow varlist id'
+        raise Warning('Unknow varlist id')
 
     return varlist
 
@@ -130,12 +130,12 @@ class DefinedROMSBaseCheck(DefinedNCBaseCheck):
             
             
         if "eta_rho" in ds.dimensions:
-            print "replacing shape derived nj with dimension eta_rho"
+            print("replacing shape derived nj with dimension eta_rho")
             nj = len(ds.dimensions["eta_rho"])
 
 
         if "xi_rho" in ds.dimensions:
-            print "replacing shape derived ni with dimension xi_rho"
+            print("replacing shape derived ni with dimension xi_rho")
             ni = len(ds.dimensions["xi_rho"])
         
         ninj = [ ni, nj ]
